@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookReader - Web đọc tài liệu di động</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BookReader - Ứng dụng đọc sách di động</title>
     <link rel="stylesheet" href="styless.css">
 </head>
 <body>
@@ -11,46 +11,27 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>📖 BookReader</h2>
-            <button class="close-menu-btn" id="close-menu-btn">✕</button>
+            <div class="sidebar-controls">
+                <button class="sidebar-settings-btn" id="sidebar-settings-btn" title="Cài đặt">
+                    <span class="settings-icon">⚙️</span>
+                </button>
+                <button class="close-menu-btn" id="close-menu-btn">✕</button>
+            </div>
         </div>
         
         <div class="sidebar-content">
-            <div class="upload-section">
-                <h3>Tải sách lên</h3>
-                <p class="upload-hint">Chọn file HTML/HTM từ Word</p>
-                <input type="file" id="file-input" class="file-input" accept=".html,.htm">
-                <button type="button" class="upload-btn" id="upload-btn">
-                    📂 Chọn File
-                </button>
+            <!-- Tìm kiếm mục lục -->
+            <div class="toc-search-container">
+                <input type="text" id="toc-search" placeholder="🔍 Tìm kiếm mục lục..." class="toc-search-input">
+                <div class="toc-search-results" id="toc-search-results"></div>
             </div>
 
+            <!-- Mục lục -->
             <div class="toc-section">
-                <h3>Mục lục</h3>
                 <div class="toc-container">
                     <ul id="toc-list">
                         <li class="toc-placeholder">Tải file để xem mục lục</li>
                     </ul>
-                </div>
-            </div>
-            
-            <div class="settings-section">
-                <h3>Cài đặt đọc</h3>
-                <div class="setting-item">
-                    <label for="font-size">Cỡ chữ:</label>
-                    <select id="font-size">
-                        <option value="0.9">Nhỏ</option>
-                        <option value="1" selected>Vừa</option>
-                        <option value="1.1">Lớn</option>
-                        <option value="1.2">Rất lớn</option>
-                    </select>
-                </div>
-                <div class="setting-item">
-                    <label for="theme">Chủ đề:</label>
-                    <select id="theme">
-                        <option value="light" selected>Sáng</option>
-                        <option value="sepia">Sepia</option>
-                        <option value="dark">Tối</option>
-                    </select>
                 </div>
             </div>
         </div>
@@ -58,18 +39,22 @@
 
     <!-- Main Content Area -->
     <div class="main-wrapper" id="main-wrapper">
-        <!-- Header -->
+        <!-- Compact Header -->
         <header class="reader-header">
-            <button class="menu-toggle-btn" id="menu-toggle-btn">
-                <span class="menu-icon">☰</span>
-                <span class="menu-text">Menu</span>
-            </button>
+            <div class="header-left">
+                <button class="menu-toggle-btn" id="menu-toggle-btn" title="Menu">
+                    <span class="menu-icon">☰</span>
+                </button>
+                <span class="book-title" id="book-title">BookReader</span>
+            </div>
             
-            <h1 class="book-title" id="book-title">BookReader</h1>
-            
-            <div class="header-controls">
-                <button class="nav-btn" id="prev-btn" title="Trang trước">‹</button>
-                <button class="nav-btn" id="next-btn" title="Trang sau">›</button>
+            <div class="header-right">
+                <div class="page-indicator" id="page-indicator">
+                    <span id="current-page">-</span>/<span id="total-pages">-</span>
+                </div>
+                <button class="settings-btn" id="settings-btn" title="Cài đặt">
+                    <span class="settings-icon">⚙️</span>
+                </button>
             </div>
         </header>
 
@@ -101,25 +86,46 @@
             <div id="file-content-display" class="file-content" style="display:none;"></div>
         </main>
 
-        <!-- Footer Navigation -->
+        <!-- Progress Bar -->
         <footer class="reader-footer">
             <div class="progress-bar">
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
-            <div class="footer-controls">
-                <button class="footer-btn" id="footer-prev-btn">
-                    <span class="btn-icon">‹</span>
-                    <span class="btn-text">Trước</span>
-                </button>
-                <div class="page-info">
-                    <span id="current-page">-</span>/<span id="total-pages">-</span>
-                </div>
-                <button class="footer-btn" id="footer-next-btn">
-                    <span class="btn-text">Sau</span>
-                    <span class="btn-icon">›</span>
+        </footer>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-header">
+            <h3>Cài đặt đọc</h3>
+            <button class="close-settings-btn" id="close-settings-btn">✕</button>
+        </div>
+        <div class="settings-content">
+            <div class="setting-item">
+                <label for="font-size">Cỡ chữ:</label>
+                <select id="font-size">
+                    <option value="0.9">Nhỏ</option>
+                    <option value="1" selected>Vừa</option>
+                    <option value="1.1">Lớn</option>
+                    <option value="1.2">Rất lớn</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label for="theme">Chủ đề:</label>
+                <select id="theme">
+                    <option value="light" selected>Sáng</option>
+                    <option value="sepia">Sepia</option>
+                    <option value="dark">Tối</option>
+                </select>
+            </div>
+            <div class="upload-section">
+                <h4>Tải sách mới</h4>
+                <input type="file" id="file-input" class="file-input" accept=".html,.htm">
+                <button type="button" class="upload-btn" id="upload-btn">
+                    📂 Chọn File HTML
                 </button>
             </div>
-        </footer>
+        </div>
     </div>
 
     <!-- Loading Overlay -->
