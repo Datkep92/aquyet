@@ -6,10 +6,16 @@ class BookReader {
         this.totalPages = 0;
         this.headings = [];
         this.isMenuOpen = false;
+        this.isSettingsOpen = false;
         this.touchStartX = 0;
         this.touchStartY = 0;
+        this.currentBook = null;
         
         console.log('📖 BookReader initialized');
+        this.loadLastBook();
+        this.disableZoom();
+        this.disableHorizontalScroll();
+        this.loadPreferences();
     }
 
     initializeElements() {
@@ -17,6 +23,12 @@ class BookReader {
         this.sidebar = document.getElementById('sidebar');
         this.menuToggleBtn = document.getElementById('menu-toggle-btn');
         this.closeMenuBtn = document.getElementById('close-menu-btn');
+        this.sidebarSettingsBtn = document.getElementById('sidebar-settings-btn');
+        
+        // Settings elements
+        this.settingsPanel = document.getElementById('settings-panel');
+        this.settingsBtn = document.getElementById('settings-btn');
+        this.closeSettingsBtn = document.getElementById('close-settings-btn');
         
         // File handling
         this.fileInput = document.getElementById('file-input');
@@ -32,17 +44,16 @@ class BookReader {
         
         // Table of contents
         this.tocList = document.getElementById('toc-list');
+        this.tocSearch = document.getElementById('toc-search');
+        this.tocSearchResults = document.getElementById('toc-search-results');
         
-        // Navigation
-        this.prevBtn = document.getElementById('prev-btn');
-        this.nextBtn = document.getElementById('next-btn');
-        this.footerPrevBtn = document.getElementById('footer-prev-btn');
-        this.footerNextBtn = document.getElementById('footer-next-btn');
-        
-        // Progress and pages
-        this.progressFill = document.getElementById('progress-fill');
+        // Page indicator
         this.currentPageEl = document.getElementById('current-page');
         this.totalPagesEl = document.getElementById('total-pages');
+        this.pageIndicator = document.getElementById('page-indicator');
+        
+        // Progress
+        this.progressFill = document.getElementById('progress-fill');
         
         // Settings
         this.fontSizeSelect = document.getElementById('font-size');
@@ -64,26 +75,37 @@ class BookReader {
             this.closeMenu();
         });
         
+        // Settings controls
+        this.settingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleSettings();
+        });
+        
+        this.sidebarSettingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleSettings();
+        });
+        
+        this.closeSettingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.closeSettings();
+        });
+        
         // File handling
         this.uploadBtn.addEventListener('click', () => this.fileInput.click());
-        this.getStartedBtn.addEventListener('click', () => this.fileInput.click());
+        this.getStartedBtn.addEventListener('click', () => {
+            this.toggleSettings();
+            setTimeout(() => this.fileInput.click(), 300);
+        });
         this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files[0]));
         
-        // Navigation
-        this.prevBtn.addEventListener('click', () => this.previousPage());
-        this.nextBtn.addEventListener('click', () => this.nextPage());
-        this.footerPrevBtn.addEventListener('click', () => this.previousPage());
-        this.footerNextBtn.addEventListener('click', () => this.nextPage());
-        
-        // Settings - SỬA LỖI: Thêm sự kiện change và đóng menu
+        // Settings changes
         this.fontSizeSelect.addEventListener('change', (e) => {
             this.changeFontSize(e.target.value);
-            this.closeMenu(); // Đóng menu sau khi chọn
         });
         
         this.themeSelect.addEventListener('change', (e) => {
             this.changeTheme(e.target.value);
-            this.closeMenu(); // Đóng menu sau khi chọn
         });
         
         // Touch events for swipe navigation
@@ -93,31 +115,102 @@ class BookReader {
         // Keyboard navigation
         document.addEventListener('keydown', (e) => this.handleKeydown(e));
         
-        // Close menu when clicking on main content
+        // Close panels when clicking outside
         document.addEventListener('click', (e) => {
             if (this.isMenuOpen && !e.target.closest('.sidebar') && !e.target.closest('.menu-toggle-btn')) {
                 this.closeMenu();
             }
+            if (this.isSettingsOpen && !e.target.closest('.settings-panel') && !e.target.closest('.settings-btn') && !e.target.closest('.sidebar-settings-btn')) {
+                this.closeSettings();
+            }
         });
 
-        // Ngăn sự kiện click trên sidebar lan ra ngoài
-        this.sidebar.addEventListener('click', (e) => {
-            e.stopPropagation();
+        // Prevent event propagation
+        this.sidebar.addEventListener('click', (e) => e.stopPropagation());
+        this.settingsPanel.addEventListener('click', (e) => e.stopPropagation());
+
+        // Scroll event for page tracking
+        this.contentReader.addEventListener('scroll', () => {
+            this.updateCurrentPage();
+            this.saveReadingProgress();
         });
+    }
+
+    disableZoom() {
+        // Ngăn chặn zoom bằng gesture
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        document.addEventListener('gesturechange', (e) => e.preventDefault());
+        document.addEventListener('gestureend', (e) => e.preventDefault());
+        
+        // Ngăn chặn double tap zoom
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    }
+
+    disableHorizontalScroll() {
+        // Ngăn chặn scroll ngang
+        this.contentReader.addEventListener('scroll', (e) => {
+            if (e.target.scrollLeft !== 0) {
+                e.target.scrollLeft = 0;
+            }
+        });
+    }
+
+    loadPreferences() {
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('bookreader-theme');
+        if (savedTheme) {
+            this.themeSelect.value = savedTheme;
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+        
+        // Load saved font size preference
+        const savedFontSize = localStorage.getItem('bookreader-fontsize');
+        if (savedFontSize) {
+            this.fontSizeSelect.value = savedFontSize;
+            if (this.fileContentDiv && this.fileContentDiv.innerHTML.trim() !== '') {
+                this.fileContentDiv.style.fontSize = `${savedFontSize}rem`;
+            }
+        }
+    }
+
+    loadLastBook() {
+        const lastBookName = localStorage.getItem('bookreader_lastbook');
+        if (lastBookName) {
+            this.loadBookFromStorage(lastBookName);
+        }
     }
 
     toggleMenu() {
         this.isMenuOpen = !this.isMenuOpen;
         this.sidebar.classList.toggle('active', this.isMenuOpen);
-        this.menuToggleBtn.innerHTML = this.isMenuOpen ? 
-            '<span class="menu-icon">✕</span><span class="menu-text">Đóng</span>' : 
-            '<span class="menu-icon">☰</span><span class="menu-text">Menu</span>';
+        if (this.isMenuOpen) {
+            this.closeSettings();
+        }
     }
 
     closeMenu() {
         this.isMenuOpen = false;
         this.sidebar.classList.remove('active');
-        this.menuToggleBtn.innerHTML = '<span class="menu-icon">☰</span><span class="menu-text">Menu</span>';
+    }
+
+    toggleSettings() {
+        this.isSettingsOpen = !this.isSettingsOpen;
+        this.settingsPanel.classList.toggle('active', this.isSettingsOpen);
+        if (this.isSettingsOpen) {
+            this.closeMenu();
+        }
+    }
+
+    closeSettings() {
+        this.isSettingsOpen = false;
+        this.settingsPanel.classList.remove('active');
     }
 
     handleFileSelect(file) {
@@ -131,21 +224,42 @@ class BookReader {
         reader.onload = (e) => {
             try {
                 const content = e.target.result;
+                const fileName = file.name.replace(/\.[^/.]+$/, "");
+                
+                // Tạo đối tượng sách
+                this.currentBook = {
+                    name: fileName,
+                    content: content,
+                    timestamp: new Date().getTime(),
+                    lastPosition: 0
+                };
+                
                 this.fileContentDiv.innerHTML = content;
                 this.optimizeContent();
                 
                 this.fileContentDiv.style.display = 'block';
-                this.bookTitle.textContent = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+                this.bookTitle.textContent = fileName;
                 
                 this.generateTOC();
                 this.calculatePages();
-                this.goToPage(0);
+                
+                // Lưu sách vào localStorage
+                this.saveBookToStorage();
+                
+                // Lưu sách cuối cùng
+                localStorage.setItem('bookreader_lastbook', fileName);
+                
+                // Khôi phục tiến độ đọc nếu có
+                this.restoreReadingProgress();
+                
+                // Áp dụng font size đã lưu
+                const savedFontSize = localStorage.getItem('bookreader-fontsize');
+                if (savedFontSize) {
+                    this.fileContentDiv.style.fontSize = `${savedFontSize}rem`;
+                }
                 
                 this.hideLoading();
-                
-                if (this.isMenuOpen) {
-                    this.closeMenu();
-                }
+                this.closeSettings();
                 
                 console.log('✅ File loaded successfully');
             } catch (error) {
@@ -159,8 +273,118 @@ class BookReader {
             this.showError('Lỗi khi đọc file.');
         };
         
-        // Use windows-1252 encoding for Word HTML files
         reader.readAsText(file, 'windows-1252');
+    }
+
+    saveBookToStorage() {
+        if (!this.currentBook) return;
+        
+        try {
+            const savedBooks = this.getSavedBooks();
+            const existingBookIndex = savedBooks.findIndex(book => book.name === this.currentBook.name);
+            
+            if (existingBookIndex !== -1) {
+                savedBooks[existingBookIndex] = this.currentBook;
+            } else {
+                savedBooks.push(this.currentBook);
+            }
+            
+            localStorage.setItem('bookreader_books', JSON.stringify(savedBooks));
+            console.log('💾 Book saved to localStorage');
+            
+        } catch (error) {
+            console.error('❌ Error saving book to storage:', error);
+        }
+    }
+
+    getSavedBooks() {
+        try {
+            const savedBooks = localStorage.getItem('bookreader_books');
+            return savedBooks ? JSON.parse(savedBooks) : [];
+        } catch (error) {
+            console.error('❌ Error reading saved books:', error);
+            return [];
+        }
+    }
+
+    saveReadingProgress() {
+        if (!this.currentBook) return;
+        
+        const scrollTop = this.contentReader.scrollTop;
+        this.currentBook.lastPosition = scrollTop;
+        this.currentBook.lastRead = new Date().getTime();
+        
+        this.saveBookToStorage();
+    }
+
+    restoreReadingProgress() {
+        if (!this.currentBook) return;
+        
+        const savedBooks = this.getSavedBooks();
+        const savedBook = savedBooks.find(book => book.name === this.currentBook.name);
+        
+        if (savedBook && savedBook.lastPosition) {
+            setTimeout(() => {
+                this.contentReader.scrollTo({
+                    top: savedBook.lastPosition,
+                    behavior: 'smooth'
+                });
+                
+                setTimeout(() => {
+                    this.updateCurrentPage();
+                }, 200);
+                
+                console.log('📖 Reading progress restored');
+            }, 100);
+        }
+    }
+
+    loadBookFromStorage(bookName) {
+        const savedBooks = this.getSavedBooks();
+        const book = savedBooks.find(b => b.name === bookName);
+        
+        if (book) {
+            this.showLoading();
+            this.placeholderDiv.style.display = 'none';
+            
+            this.currentBook = book;
+            this.fileContentDiv.innerHTML = book.content;
+            this.optimizeContent();
+            
+            this.fileContentDiv.style.display = 'block';
+            this.bookTitle.textContent = book.name;
+            
+            this.generateTOC();
+            this.calculatePages();
+            this.restoreReadingProgress();
+            
+            // Áp dụng font size đã lưu
+            const savedFontSize = localStorage.getItem('bookreader-fontsize');
+            if (savedFontSize) {
+                this.fileContentDiv.style.fontSize = `${savedFontSize}rem`;
+            }
+            
+            this.hideLoading();
+            console.log('✅ Book loaded from storage');
+        }
+    }
+
+    deleteBookFromStorage(bookName) {
+        const savedBooks = this.getSavedBooks();
+        const filteredBooks = savedBooks.filter(book => book.name !== bookName);
+        
+        localStorage.setItem('bookreader_books', JSON.stringify(filteredBooks));
+        
+        // Nếu đang xem sách bị xóa, clear nội dung
+        if (this.currentBook && this.currentBook.name === bookName) {
+            this.currentBook = null;
+            this.fileContentDiv.style.display = 'none';
+            this.placeholderDiv.style.display = 'block';
+            this.bookTitle.textContent = 'BookReader';
+            localStorage.removeItem('bookreader_lastbook');
+        }
+        
+        console.log('🗑️ Book deleted from storage');
     }
 
     optimizeContent() {
@@ -173,18 +397,20 @@ class BookReader {
             img.loading = 'lazy';
         });
         
-        // Optimize tables
+        // Optimize tables - đảm bảo không bị tràn ngang
         contentDiv.querySelectorAll('table').forEach(table => {
             table.style.width = '100%';
             table.style.borderCollapse = 'collapse';
             table.style.display = 'block';
             table.style.overflowX = 'auto';
             table.style.fontSize = '0.9em';
+            table.style.maxWidth = '100%';
         });
         
-        // Add responsive classes
-        contentDiv.querySelectorAll('h1, h2, h3').forEach(heading => {
-            heading.classList.add('content-heading');
+        // Đảm bảo tất cả elements không vượt quá chiều rộng
+        contentDiv.querySelectorAll('*').forEach(el => {
+            el.style.maxWidth = '100%';
+            el.style.boxSizing = 'border-box';
         });
         
         // Remove empty elements
@@ -201,9 +427,9 @@ class BookReader {
         
         const allElements = this.fileContentDiv.querySelectorAll('*');
         const headingRegexes = [
-            /^(\d{1,2})\.\s+(.+)/,           // "1. Tiêu đề"
-            /^(\d{1,2}\.\d{1,2})\.\s+(.+)/,  // "1.1. Tiêu đề"
-            /^(\d{1,2}\.\d{1,2}\.\d{1,2})\.\s+(.+)/ // "1.1.1. Tiêu đề"
+            /^(\d{1,2})\.\s+(.+)/,
+            /^(\d{1,2}\.\d{1,2})\.\s+(.+)/,
+            /^(\d{1,2}\.\d{1,2}\.\d{1,2})\.\s+(.+)/
         ];
         
         const prioritySelectors = [
@@ -251,30 +477,120 @@ class BookReader {
             return positionA - positionB;
         });
         
-        // Display TOC
+        this.displayTOCWithSearch();
+    }
+
+    displayTOCWithSearch() {
         if (this.headings.length === 0) {
             this.tocList.innerHTML = '<li class="toc-placeholder">Không tìm thấy mục lục trong file</li>';
-        } else {
-            this.headings.forEach((heading, index) => {
-                const listItem = document.createElement('li');
-                const link = document.createElement('a');
-                
-                link.href = `#${heading.id}`;
-                link.textContent = heading.text;
-                link.className = `toc-link level-${heading.level}`;
-                
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.scrollToHeading(heading.element);
-                    this.closeMenu(); // Đóng menu sau khi chọn mục lục
-                });
-                
-                listItem.appendChild(link);
-                this.tocList.appendChild(listItem);
-            });
-            
-            console.log(`📑 Generated TOC with ${this.headings.length} headings`);
+            return;
         }
+
+        const tocItemsHTML = this.headings.map((heading, index) => {
+            return `
+                <li class="toc-item">
+                    <a href="#${heading.id}" class="toc-link level-${heading.level}" data-index="${index}">
+                        <span class="toc-text">${heading.text}</span>
+                    </a>
+                </li>
+            `;
+        }).join('');
+
+        this.tocList.innerHTML = tocItemsHTML;
+
+        // Thêm sự kiện tìm kiếm
+        this.tocSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                this.tocSearchResults.style.display = 'none';
+                this.showAllTOCItems();
+                return;
+            }
+
+            const filteredHeadings = this.headings.filter(heading => 
+                heading.text.toLowerCase().includes(searchTerm)
+            );
+
+            this.filterTOCItems(searchTerm);
+            this.showSearchResults(filteredHeadings, searchTerm);
+        });
+
+        // Thêm sự kiện click cho các link
+        this.tocList.querySelectorAll('.toc-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const index = parseInt(link.getAttribute('data-index'));
+                this.scrollToHeading(this.headings[index].element);
+                this.closeMenu();
+            });
+        });
+    }
+
+    filterTOCItems(searchTerm) {
+        const tocItems = this.tocList.querySelectorAll('.toc-item');
+        
+        tocItems.forEach(item => {
+            const text = item.querySelector('.toc-text').textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                item.style.display = 'flex';
+                const originalText = item.querySelector('.toc-text').textContent;
+                const highlightedText = this.highlightText(originalText, searchTerm);
+                item.querySelector('.toc-text').innerHTML = highlightedText;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    showAllTOCItems() {
+        const tocItems = this.tocList.querySelectorAll('.toc-item');
+        tocItems.forEach(item => {
+            item.style.display = 'flex';
+            const text = item.querySelector('.toc-text').textContent;
+            item.querySelector('.toc-text').textContent = text;
+        });
+    }
+
+    showSearchResults(filteredHeadings, searchTerm) {
+        if (filteredHeadings.length === 0) {
+            this.tocSearchResults.innerHTML = '<div class="toc-no-results">Không tìm thấy kết quả</div>';
+            this.tocSearchResults.style.display = 'block';
+            return;
+        }
+
+        const resultsHTML = filteredHeadings.map(heading => {
+            const highlightedText = this.highlightText(heading.text, searchTerm);
+            return `
+                <div class="toc-search-result" data-index="${this.headings.indexOf(heading)}">
+                    <div class="toc-search-text">${highlightedText}</div>
+                </div>
+            `;
+        }).join('');
+
+        this.tocSearchResults.innerHTML = resultsHTML;
+        this.tocSearchResults.style.display = 'block';
+
+        this.tocSearchResults.querySelectorAll('.toc-search-result').forEach(result => {
+            result.addEventListener('click', () => {
+                const index = parseInt(result.getAttribute('data-index'));
+                this.scrollToHeading(this.headings[index].element);
+                this.closeMenu();
+                this.tocSearchResults.style.display = 'none';
+                this.tocSearch.value = '';
+                this.showAllTOCItems();
+            });
+        });
+    }
+
+    highlightText(text, searchTerm) {
+        if (!searchTerm) return text;
+        const regex = new RegExp(`(${this.escapeRegex(searchTerm)})`, 'gi');
+        return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
+
+    escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     findHeadingMatch(text, regexes) {
@@ -305,19 +621,16 @@ class BookReader {
             block: 'start'
         });
         
-        // Update current page based on scroll position
         setTimeout(() => this.updateCurrentPage(), 300);
     }
 
     getElementPosition(element) {
         let position = 0;
         let prevElement = element.previousElementSibling;
-        
         while (prevElement) {
             position++;
             prevElement = prevElement.previousElementSibling;
         }
-        
         return position;
     }
 
@@ -326,53 +639,7 @@ class BookReader {
         const totalHeight = this.fileContentDiv.scrollHeight;
         this.totalPages = Math.ceil(totalHeight / contentHeight);
         this.totalPagesEl.textContent = this.totalPages;
-        this.updateNavigation();
-    }
-
-    goToPage(page) {
-        if (page < 0 || page >= this.totalPages) return;
-        
-        this.currentPage = page;
-        const scrollPosition = (page / this.totalPages) * this.fileContentDiv.scrollHeight;
-        
-        this.contentReader.scrollTo({
-            top: scrollPosition,
-            behavior: 'smooth'
-        });
-        
-        this.updatePageInfo();
-    }
-
-    nextPage() {
-        if (this.currentPage < this.totalPages - 1) {
-            this.goToPage(this.currentPage + 1);
-        }
-    }
-
-    previousPage() {
-        if (this.currentPage > 0) {
-            this.goToPage(this.currentPage - 1);
-        }
-    }
-
-    updatePageInfo() {
-        this.currentPageEl.textContent = this.currentPage + 1;
-        const progress = ((this.currentPage + 1) / this.totalPages) * 100;
-        this.progressFill.style.width = `${progress}%`;
-        this.updateNavigation();
-    }
-
-    updateNavigation() {
-        const hasPrev = this.currentPage > 0;
-        const hasNext = this.currentPage < this.totalPages - 1;
-        
-        [this.prevBtn, this.footerPrevBtn].forEach(btn => {
-            btn.disabled = !hasPrev;
-        });
-        
-        [this.nextBtn, this.footerNextBtn].forEach(btn => {
-            btn.disabled = !hasNext;
-        });
+        this.updateCurrentPage();
     }
 
     updateCurrentPage() {
@@ -380,8 +647,13 @@ class BookReader {
         const contentHeight = this.contentReader.clientHeight;
         const totalHeight = this.fileContentDiv.scrollHeight;
         
-        this.currentPage = Math.floor((scrollTop / totalHeight) * this.totalPages);
-        this.updatePageInfo();
+        if (totalHeight > 0) {
+            this.currentPage = Math.floor((scrollTop / totalHeight) * this.totalPages);
+            this.currentPageEl.textContent = this.currentPage + 1;
+            
+            const progress = ((this.currentPage + 1) / this.totalPages) * 100;
+            this.progressFill.style.width = `${progress}%`;
+        }
     }
 
     handleTouchStart(e) {
@@ -398,13 +670,13 @@ class BookReader {
         const diffX = touchEndX - this.touchStartX;
         const diffY = touchEndY - this.touchStartY;
         
-        // Only handle horizontal swipes with minimal vertical movement
+        // Chỉ xử lý vuốt ngang với độ lệch dọc nhỏ
         if (Math.abs(diffX) > 50 && Math.abs(diffY) < 100) {
             if (diffX > 0) {
-                // Swipe right - previous page
+                // Vuốt phải - trang trước
                 this.previousPage();
             } else {
-                // Swipe left - next page
+                // Vuốt trái - trang sau
                 this.nextPage();
             }
         }
@@ -413,30 +685,49 @@ class BookReader {
         this.touchStartY = 0;
     }
 
+    nextPage() {
+        if (this.currentPage < this.totalPages - 1) {
+            this.goToPage(this.currentPage + 1);
+        }
+    }
+
+    previousPage() {
+        if (this.currentPage > 0) {
+            this.goToPage(this.currentPage - 1);
+        }
+    }
+
+    goToPage(page) {
+        if (page < 0 || page >= this.totalPages) return;
+        
+        this.currentPage = page;
+        const scrollPosition = (page / this.totalPages) * this.fileContentDiv.scrollHeight;
+        
+        this.contentReader.scrollTo({
+            top: scrollPosition,
+            behavior: 'smooth'
+        });
+    }
+
     handleKeydown(e) {
         if (e.key === 'ArrowLeft') {
             this.previousPage();
         } else if (e.key === 'ArrowRight') {
             this.nextPage();
-        } else if (e.key === 'Escape' && this.isMenuOpen) {
-            this.closeMenu();
+        } else if (e.key === 'Escape') {
+            if (this.isMenuOpen) this.closeMenu();
+            if (this.isSettingsOpen) this.closeSettings();
         }
     }
 
     changeFontSize(size) {
-        // SỬA LỖI: Áp dụng cỡ chữ cho toàn bộ nội dung file
         this.fileContentDiv.style.fontSize = `${size}rem`;
-        
-        // Lưu cài đặt vào localStorage
         localStorage.setItem('bookreader-fontsize', size);
-        
-        // Recalculate pages after font size change
         setTimeout(() => this.calculatePages(), 100);
     }
 
     changeTheme(theme) {
         document.body.setAttribute('data-theme', theme);
-        // Save preference to localStorage
         localStorage.setItem('bookreader-theme', theme);
     }
 
@@ -456,33 +747,11 @@ class BookReader {
             <p>${message}</p>
             <button class="get-started-btn" onclick="location.reload()">Thử lại</button>
         `;
+        this.hideLoading();
     }
 }
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    const app = new BookReader();
-    
-    // Load saved theme preference
-    const savedTheme = localStorage.getItem('bookreader-theme');
-    if (savedTheme) {
-        document.getElementById('theme').value = savedTheme;
-        document.body.setAttribute('data-theme', savedTheme);
-    }
-    
-    // Load saved font size preference - THÊM TÍNH NĂNG NÀY
-    const savedFontSize = localStorage.getItem('bookreader-fontsize');
-    if (savedFontSize) {
-        document.getElementById('font-size').value = savedFontSize;
-        // Áp dụng cỡ chữ ngay lập tức nếu có nội dung
-        const fileContentDiv = document.getElementById('file-content-display');
-        if (fileContentDiv && fileContentDiv.innerHTML.trim() !== '') {
-            fileContentDiv.style.fontSize = `${savedFontSize}rem`;
-        }
-    }
-    
-    // Add scroll event listener for page tracking
-    document.getElementById('content-reader').addEventListener('scroll', () => {
-        app.updateCurrentPage();
-    });
+    new BookReader();
 });
