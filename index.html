@@ -1,574 +1,288 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trình đọc tài liệu y tế</title>
+    <title>Trình đọc file Word</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.17/mammoth.browser.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
         }
         
         body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
+            background-color: #f5f5f5;
+            padding: 20px;
         }
         
         .container {
-            display: flex;
-            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             overflow: hidden;
         }
         
-        /* Sidebar mục lục */
-        .sidebar {
-            width: 300px;
-            background-color: #2c3e50;
+        .header {
+            background: #2c3e50;
             color: white;
-            overflow-y: auto;
-            transition: width 0.3s ease;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            z-index: 10;
-        }
-        
-        .sidebar.collapsed {
-            width: 50px;
-        }
-        
-        .sidebar-header {
             padding: 20px;
-            background-color: #1a252f;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            text-align: center;
         }
         
-        .sidebar-header h2 {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .toggle-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 5px;
-        }
-        
-        .file-upload {
-            padding: 15px 20px;
-            border-bottom: 1px solid #34495e;
+        .upload-section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
         }
         
         .file-input {
+            margin: 10px 0;
+            padding: 10px;
             width: 100%;
-            padding: 8px;
+            border: 2px dashed #3498db;
             border-radius: 4px;
-            border: 1px solid #34495e;
-            background-color: #34495e;
+            background: white;
+        }
+        
+        .process-btn {
+            background: #3498db;
             color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        .process-btn:hover {
+            background: #2980b9;
+        }
+        
+        .process-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .content-area {
+            display: flex;
+            height: 600px;
         }
         
         .toc {
-            padding: 0;
+            width: 300px;
+            background: #34495e;
+            color: white;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        
+        .toc h3 {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #4a6278;
+            padding-bottom: 10px;
         }
         
         .toc-item {
             list-style: none;
-            border-bottom: 1px solid #34495e;
+            margin-bottom: 8px;
         }
         
         .toc-link {
-            display: block;
-            padding: 12px 20px;
             color: #ecf0f1;
             text-decoration: none;
-            transition: background-color 0.2s;
-            font-size: 14px;
+            display: block;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
         }
         
         .toc-link:hover {
-            background-color: #34495e;
+            background: #4a6278;
         }
         
-        .toc-link.active {
-            background-color: #3498db;
-            font-weight: 600;
-        }
-        
-        /* Nội dung chính */
         .content {
             flex: 1;
+            padding: 20px;
             overflow-y: auto;
-            padding: 30px;
-            background-color: white;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
-        }
-        
-        .document-title {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 15px;
+            background: white;
         }
         
         .chapter {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid #3498db;
+            background: #f8f9fa;
         }
         
-        .chapter-title {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ecf0f1;
-        }
-        
-        .section {
-            margin-bottom: 20px;
-        }
-        
-        .section-title {
-            color: #3498db;
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-        
-        .section-content {
-            padding-left: 15px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-        }
-        
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        
-        th, td {
+        .status {
+            margin-top: 10px;
             padding: 10px;
-            text-align: left;
+            border-radius: 4px;
         }
         
-        th {
-            background-color: #f2f6fc;
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
         
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                height: auto;
-                max-height: 40vh;
-            }
-            
-            .sidebar.collapsed {
-                width: 100%;
-                height: 60px;
-            }
-            
-            .sidebar.collapsed .toc,
-            .sidebar.collapsed .file-upload {
-                display: none;
-            }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Sidebar mục lục -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h2 id="sidebar-title">MỤC LỤC</h2>
-                <button class="toggle-btn" id="toggle-btn">≡</button>
-            </div>
-            <div class="file-upload">
-                <input type="file" id="file-input" class="file-input" accept=".doc,.docx,.txt,.pdf">
-            </div>
-            <ul class="toc" id="toc">
-                <!-- Mục lục sẽ được tạo tự động -->
-            </ul>
+        <div class="header">
+            <h1>Trình đọc file Word (.docx)</h1>
+            <p>Sử dụng thư viện mammoth.js</p>
         </div>
         
-        <!-- Nội dung chính -->
-        <div class="content" id="content">
-            <h1 class="document-title" id="document-title">Quy trình kỹ thuật Phòng Điều dưỡng</h1>
-            <div id="document-content">
-                <!-- Nội dung tài liệu sẽ được hiển thị ở đây -->
+        <div class="upload-section">
+            <input type="file" id="fileInput" class="file-input" accept=".docx">
+            <button id="processBtn" class="process-btn" disabled>Xử lý file</button>
+            <div id="status" class="status info">
+                Vui lòng chọn file Word (.docx) để bắt đầu
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="toc">
+                <h3>MỤC LỤC</h3>
+                <ul id="tocList"></ul>
+            </div>
+            
+            <div class="content" id="content">
+                <p>Nội dung sẽ hiển thị ở đây sau khi xử lý file.</p>
             </div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.getElementById('sidebar');
-            const toggleBtn = document.getElementById('toggle-btn');
-            const toc = document.getElementById('toc');
-            const content = document.getElementById('document-content');
-            const fileInput = document.getElementById('file-input');
-            const documentTitle = document.getElementById('document-title');
-            const sidebarTitle = document.getElementById('sidebar-title');
+            const fileInput = document.getElementById('fileInput');
+            const processBtn = document.getElementById('processBtn');
+            const statusDiv = document.getElementById('status');
+            const tocList = document.getElementById('tocList');
+            const contentDiv = document.getElementById('content');
             
-            // Xử lý thu gọn/mở rộng sidebar
-            toggleBtn.addEventListener('click', function() {
-                sidebar.classList.toggle('collapsed');
-                if (sidebar.classList.contains('collapsed')) {
-                    sidebarTitle.textContent = "≡";
-                } else {
-                    sidebarTitle.textContent = "MỤC LỤC";
-                }
-            });
+            let currentFile = null;
             
-            // Xử lý upload file
+            // Xử lý khi chọn file
             fileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(e) {
-                        const text = e.target.result;
-                        processDocument(text);
-                    };
-                    
-                    reader.readAsText(file);
+                    if (file.name.endsWith('.docx')) {
+                        currentFile = file;
+                        processBtn.disabled = false;
+                        statusDiv.textContent = `Đã chọn file: ${file.name}`;
+                        statusDiv.className = 'status success';
+                    } else {
+                        currentFile = null;
+                        processBtn.disabled = true;
+                        statusDiv.textContent = 'Vui lòng chọn file .docx';
+                        statusDiv.className = 'status error';
+                    }
                 }
             });
             
-            // Xử lý tài liệu mẫu
-            function loadSampleDocument() {
-                // Đây là nội dung mẫu, trong thực tế sẽ được thay thế bằng nội dung từ file
-                const sampleContent = `MỤC LỤC
-
-[1. KỸ THUẬT RỬA TAY THƯỜNG QUI 1](#__RefHeading___Toc81368193)
-
-[2. KỸ THUẬT RỬA TAY BẰNG DUNG DỊCH CỒN 3](#__RefHeading___Toc81368196)
-
-[3. KỸ THUẬT RỬA TAY NGOẠI KHOA 5](#__RefHeading___Toc81368199)
-
-[4. KỸ THUẬT MANG GĂNG VÔ KHUẨN VÀ THÁO GĂNG NHIỄM 9](#refheading___toc81368202)
-
-[5. KỸ THUẬT ĐẾM MẠCH 11](#__RefHeading___Toc81368205)
-
-[6. KỸ THUẬT ĐO NHIỆT ĐỘ 13](#__RefHeading___Toc81368207)
-
-[7. KỸ THUẬT ĐO HUYẾT ÁP 15](#__RefHeading___Toc81368209)
-
-[8. KỸ THUẬT ĐẾM NHỊP THỞ 17](#__RefHeading___Toc81368211)
-
-[9. KỸ THUẬT GIÚP NGƯỜI BỆNH UỐNG THUỐC 19](#__RefHeading___Toc81368213)
-
-[10. KỸ THUẬT THAY BĂNG, CẮT CHỈ VẾT THƯƠNG THƯỜNG QUY 22](#refheading___toc81368215)
-
-[11. KỸ THUẬT CHĂM SÓC VẾT THƯƠNG CÓ ỐNG DẪN LƯU 25](#refheading___toc81368217)
-
-[12. KỸ THUẬTCHĂM SÓC HẬU MÔN NHÂN TẠO 32](#__RefHeading___Toc81368218)
-
-[13. KỸ THUẬT TẮM NGƯỜI BỆNH TẠI GIƯỜNG 36](#__RefHeading___Toc81368219)
-
-[14. KỸ THUẬT CHĂM SÓC RĂNG MIỆNG 39](#__RefHeading___Toc81368221)
-
-[15. KỸ THUẬT HÚT ĐÀM MŨI MIỆNG 42](#__RefHeading___Toc81368223)
-
-[16. KỸ THUẬT HÚT ĐÀM QUA ỐNG NKQ, MKQ 45](#__RefHeading___Toc81368225)
-
-[17. KỸ THUẬT HÚT ĐỜM ĐƯỜNG HÔ HẤP DƯỚI BẰNG HỆ THỐNG KÍN 50](#refheading___toc81368226)
-
-[18. KỸ THUẬT ĐO ÁP LỰC BÓNG CHÈN Ở BỆNH NHÂN CÓ ĐẶT ỐNG NỘI KHÍ QUẢN HOẶC MỞ KHÍ QUẢN 57](#__RefHeading___Toc81368227)
-
-[19. KỸ THUẬT CHĂM SÓC MKQ VÀ NGƯỜI BỆNH CÓ MKQ 59](#__RefHeading___Toc81368229)
-
-[20. KỸ THUẬT GIÚP NGƯỜI BỆNH THỞ OXY QUA CANNULA 62](#__RefHeading___Toc81368230)
-
-[21. KỸ THUẬT THÔNG TIỂU 65](#__RefHeading___Toc81368242)
-
-[22. KỸ THUẬT THỤT THÁO 71](#__RefHeading___Toc81368262)
-
-[23. KỸ THUẬT TIÊM BẮP 74](#__RefHeading___Toc81368263)
-
-[24. KỸ THUẬT TIÊM TRUYỀN TĨNH MẠCH 78](#__RefHeading___Toc81368288)
-
-[25. KỸ THUẬT TIÊM TĨNH MẠCH 81](#__RefHeading___Toc81368306)
-
-[26. KỸ THUẬT TIÊM DƯỚI DA 84](#__RefHeading___Toc81368307)
-
-[27. KỸ THUẬT TIÊM TRONG DA 87](#__RefHeading___Toc81368308)
-
-[28. KỸ THUẬT TEST LẨY DA 90](#__RefHeading___Toc81368309)
-
-[29. KỸ THUẬT TRUYỀN MÁU 94](#__RefHeading___Toc81368310)
-
-[30. KỸ THUẬT CHO ĂN BẰNG ỐNG 98](#__RefHeading___Toc81368330)
-
-[31. KỸ THUẬT RỬA DẠ DÀY 103](#__RefHeading___Toc81368352)
-
-[32. KỸ THUẬT BẤM ỐI 107](#__RefHeading___Toc81368353)
-
-[33. KỸ THUẬT ĐỠ ĐẺ THƯỜNG NGÔI CHỎM 110](#__RefHeading___Toc81368378)
-
-[34. KỸ THUẬT MASSAGE VÚ 118](#__RefHeading___Toc81368379)
-
-[35. KỸ THUẬT TẮM, CHĂM SÓC RỐN -- MASSAGE TRẺ SƠ SINH 120](#__RefHeading___Toc81368385)
-
-[36. KỸ THUẬT VẮT SỮA BẰNG TAY 125](#__RefHeading___Toc81368386)
-
-[37. NGHIỆM PHÁP LỌT NGÔI CHỎM 128](#__RefHeading___Toc81368387)
-
-[38. KỸ THUẬT KHÁM ÂM ĐẠO TRONG SẢN KHOA 132](#__RefHeading___Toc81368412)
-
-[39. CÁCH KHÁM KHUNG CHẬU 136](#__RefHeading___Toc81368413)
-
-[40. KỸ THUẬT ĐẶT KOVAC'S -- FOLEY -- LAMINARIA 139](#__RefHeading___Toc81368429)
-
-[41. THEO DÕI SẢN PHỤ TIỀN SẢN GIẬT -- SẢN GIẬT CÓ SỬ DỤNG MgSO4 142](#__RefHeading___Toc81368430)
-
-[42. KỸ THUẬT STRESSTEST 146](#__RefHeading___Toc81368432)
-
-[43. KỸ THUẬT NGHE TIM THAI 150](#__RefHeading___Toc81368433)
-
-[44. KỸ THUẬT NẮN 4 THỦ THUẬT LEOPOID 153](#__RefHeading___Toc81368434)
-
-[45. KỸ THUẬT KHÁM THAI 155](#__RefHeading___Toc81368443)
-
-[46. KỸ THUẬT NON -- STRESSTEST 160](#__RefHeading___Toc81368444)
-
-[47. KỸ THUẬT KIỂM SOÁT TỬ CUNG 163](#__RefHeading___Toc81368445)
-
-[48. KIỂM TRA NHAU 168](#__RefHeading___Toc81368446)
-
-[49. CẮT KHÂU TẦNG SINH MÔN 171](#__RefHeading___Toc81368447)
-
-[50. KỸ THUẬT RỬA ÂM HỘ 176](#__RefHeading___Toc81368448)
-
-[51. KỸ THUẬT BÓC NHAU NHÂN TẠO 179](#__RefHeading___Toc81368449)
-
-[52. KỸ THUẬT LỌC MÁU CẤP CỨU BẰNG KỸ THUẬT THẬN NHÂN TẠO 183](#__RefHeading___Toc81368450)
-
-[54. KỸ THUẬT LỌC MÁU BẰNG KỸ THUẬT THẨM TÁCH SIÊU LỌC DỊCH BÙ TRỰC TIẾP TỪ DỊCH LỌC (HEMODIAFILTRATION ONLINE - HDF ONLINE) 194](#__RefHeading___Toc81368453)
-
-[55. KỸ THUẬT CHĂM SÓC VÀ THEO DÕI BỆNH NHÂN ĐẶT CATHETER TĨNH MẠCH TRUNG TÂM 198](#__RefHeading___Toc81368454)
-
-[]{#__RefHeading___Toc81368193 .anchor}1. KỸ THUẬT RỬA TAY THƯỜNG QUI
-
-**I. MỤC ĐÍCH**
-
-- Làm sạch và loại bỏ vi khuẩn tạm trú trên bàn tay.
-- Đảm bảo an toàn cho người bệnh và nhân viên y tế.
-- Góp phần làm giảm tỷ lệ nhiễm khuẩn bệnh viện.
-
-**II. CHỈ ĐỊNH**
-
-- Trước khi tiếp xúc với bệnh nhân.
-- Trước khi thực hiện các thủ thuật trên người bệnh.
-- Sau khi tiếp xúc với bệnh nhân.
-- Sau khi tiếp xúc với dịch tiết, chất thải...(nước tiểu, phân).
-- Sau khi tiếp xúc với các vật dụng xung quanh bệnh nhân.
-
-**III. CHUẨN BỊ**
-
-- Lavabo, vòi nước có cần gạt.
-- Xà phòng nước hoặc dung dịch rửa tay khử khuẩn.
-- Hộp đựng khăn lau tay sạch dùng 1 lần hoặc khăn giấy.
-- Thùng đựng khăn (giấy) lau tay dơ.
-
-**IV. CÁC BƯỚC TIẾN HÀNH**
-
-1. Làm ướt bàn tay bằng nước, lấy xà phòng và chà hai lòng bàn tay vào nhau.
-2. Chà lòng bàn tay này lên mu và kẽ ngoài các ngón tay của bàn tay kia và ngược lại (mỗi bên 5 lần).
-3. Chà hai lòng bàn tay vào nhau, miết mạnh các kẽ trong ngón tay (5 lần).
-4. Chà mặt ngoài các ngón tay của bàn tay này vào lòng bàn tay kia.
-5. Dùng bàn tay này xoay ngón cái của bàn tay kia và ngược lại (mỗi bên 5 lần).
-6. Xoay các đầu ngón tay này vào lòng bàn tay kia và ngược lại (mỗi bên 5 lần).
-7. Rửa sạch tay dưới vòi nước.
-8. Làm khô tay.
-
-**V. AN TOÀN NGƯỜI BỆNH**
-
-| **NGUY CƠ** | **PHÒNG NGỪA** |
-|-------------|----------------|
-| Rửa tay không hiệu quả. | - Cung cấp đầy đủ phương tiện rửa tay. Khăn (giấy) lau tay chỉ dùng một lần.<br>- Tháo bỏ trang sức trước khi rửa tay.<br>- Lựa chọn đúng phương pháp VST: Nếu bàn tay nhìn rõ vết bẩn hoặc dính các dịch tiết của cơ thể phải rửa tay thường quy<br>- Thực hiện đúng kỹ thuật và thứ tự các bước của quy trình rửa tay thường quy.<br>- Khóa vòi nước bằng khăn vừa sử dụng.<br>- Thời gian rửa tay tối thiểu là 30 giây.<br>- Không sử dụng máy sấy tay để làm khô tay |
-
-# VI. TÀI LIỆU THAM KHẢO
-
-1. Bộ Y tế (2012). Kỹ năng thực hành điều dưỡng. Nhà xuất bản Y học, Hà Nội.
-2. Bộ Y tế (2010). Hướng dẫn thực hành 55 kỹ thuật điều dưỡng cơ bản, tập 2. Nhà xuất bản giáo dục Việt Nam.
-3. Quyết định 3916/QĐ-BYT ngày 28/8/2017 Về việc phê duyệt các hướng dẫn kiểm soát nhiễm khuẩn trong các cơ sở khám bệnh, chữa bệnh.`;
+            // Xử lý khi nhấn nút xử lý
+            processBtn.addEventListener('click', function() {
+                if (!currentFile) return;
                 
-                processDocument(sampleContent);
-            }
-            
-            // Tải tài liệu mẫu khi trang được tải
-            loadSampleDocument();
-            
-            // Xử lý tài liệu
-            function processDocument(text) {
-                // Xóa nội dung cũ
-                toc.innerHTML = '';
-                content.innerHTML = '';
+                statusDiv.textContent = 'Đang xử lý file...';
+                statusDiv.className = 'status info';
+                processBtn.disabled = true;
                 
-                // Tách nội dung thành các phần
-                const lines = text.split('\n');
-                let currentChapter = null;
-                let currentSection = null;
-                let inToc = false;
-                let tocContent = [];
+                const reader = new FileReader();
                 
-                // Tìm mục lục
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
+                reader.onload = function(e) {
+                    const arrayBuffer = e.target.result;
                     
-                    if (line.includes('MỤC LỤC') || line.includes('Mục lục')) {
-                        inToc = true;
-                        continue;
-                    }
-                    
-                    if (inToc) {
-                        if (line === '' || line.includes('KỸ THUẬT') || line.includes('[]{')) {
-                            if (line.includes('[]{')) {
-                                inToc = false;
+                    // Sử dụng mammoth.js để chuyển đổi
+                    mammoth.convertToHtml({arrayBuffer: arrayBuffer})
+                        .then(function(result) {
+                            // Hiển thị nội dung HTML
+                            contentDiv.innerHTML = result.value;
+                            
+                            // Tạo mục lục từ các thẻ h1, h2, h3
+                            generateTOC();
+                            
+                            statusDiv.textContent = `Xử lý thành công!`;
+                            statusDiv.className = 'status success';
+                            
+                            // Hiển thị cảnh báo nếu có
+                            if (result.messages.length > 0) {
+                                console.log('Cảnh báo:', result.messages);
                             }
-                            continue;
-                        }
-                        
-                        // Trích xuất thông tin từ dòng mục lục
-                        const tocMatch = line.match(/\[(\d+\. .*?) (\d+)\]/);
-                        if (tocMatch) {
-                            tocContent.push({
-                                title: tocMatch[1],
-                                page: tocMatch[2],
-                                anchor: line.match(/#(.*?)\]/)?.[1] || ''
-                            });
-                        }
-                    }
-                }
+                        })
+                        .catch(function(error) {
+                            statusDiv.textContent = `Lỗi: ${error.message}`;
+                            statusDiv.className = 'status error';
+                            console.error('Lỗi mammoth:', error);
+                        })
+                        .then(function() {
+                            processBtn.disabled = false;
+                        });
+                };
                 
-                // Tạo mục lục
-                tocContent.forEach(item => {
+                reader.onerror = function(error) {
+                    statusDiv.textContent = `Lỗi đọc file: ${error}`;
+                    statusDiv.className = 'status error';
+                    processBtn.disabled = false;
+                };
+                
+                reader.readAsArrayBuffer(currentFile);
+            });
+            
+            // Tạo mục lục tự động
+            function generateTOC() {
+                tocList.innerHTML = '';
+                
+                // Tìm tất cả các tiêu đề
+                const headings = contentDiv.querySelectorAll('h1, h2, h3');
+                
+                headings.forEach((heading, index) => {
+                    // Tạo ID nếu chưa có
+                    if (!heading.id) {
+                        heading.id = 'section-' + index;
+                    }
+                    
+                    // Thêm vào mục lục
                     const li = document.createElement('li');
                     li.className = 'toc-item';
                     
                     const a = document.createElement('a');
-                    a.href = `#${item.anchor}`;
+                    a.href = '#' + heading.id;
                     a.className = 'toc-link';
-                    a.textContent = item.title;
+                    a.textContent = heading.textContent;
+                    
                     a.addEventListener('click', function(e) {
                         e.preventDefault();
-                        
-                        // Xóa lớp active từ tất cả các mục
-                        document.querySelectorAll('.toc-link').forEach(link => {
-                            link.classList.remove('active');
-                        });
-                        
-                        // Thêm lớp active vào mục được chọn
-                        this.classList.add('active');
-                        
-                        // Cuộn đến phần tương ứng
-                        const target = document.getElementById(item.anchor);
-                        if (target) {
-                            target.scrollIntoView({ behavior: 'smooth' });
-                        }
+                        heading.scrollIntoView({ behavior: 'smooth' });
                     });
                     
                     li.appendChild(a);
-                    toc.appendChild(li);
+                    tocList.appendChild(li);
                 });
                 
-                // Xử lý nội dung chính
-                let currentContent = '';
-                let inChapter = false;
-                let chapterCount = 0;
-                
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    
-                    // Bỏ qua mục lục
-                    if (line.includes('MỤC LỤC') || line.includes('Mục lục')) {
-                        continue;
-                    }
-                    
-                    // Xác định chương mới
-                    const chapterMatch = line.match(/#+\s*(\d+\.\s*.*)/);
-                    if (chapterMatch) {
-                        // Lưu chương trước đó (nếu có)
-                        if (currentContent) {
-                            content.innerHTML += currentContent;
-                            currentContent = '';
-                        }
-                        
-                        chapterCount++;
-                        currentContent = `<div class="chapter" id="${tocContent[chapterCount-1]?.anchor || `chapter-${chapterCount}`}">
-                            <h2 class="chapter-title">${chapterMatch[1]}</h2>`;
-                        inChapter = true;
-                        continue;
-                    }
-                    
-                    // Xử lý nội dung trong chương
-                    if (inChapter) {
-                        // Xử lý tiêu đề phần
-                        const sectionMatch = line.match(/\*\*([IVX]+\.\s*.*?)\*\*/);
-                        if (sectionMatch) {
-                            currentContent += `<div class="section">
-                                <h3 class="section-title">${sectionMatch[1]}</h3>
-                                <div class="section-content">`;
-                            continue;
-                        }
-                        
-                        // Xử lý bảng
-                        if (line.includes('|') && line.includes('---')) {
-                            // Bỏ qua dòng phân cách bảng
-                            continue;
-                        }
-                        
-                        if (line.includes('|')) {
-                            const cells = line.split('|').filter(cell => cell.trim() !== '');
-                            if (cells.length > 1) {
-                                if (!currentContent.includes('<table>')) {
-                                    currentContent += '<table><thead><tr>';
-                                    cells.forEach(cell => {
-                                        currentContent += `<th>${cell.trim()}</th>`;
-                                    });
-                                    currentContent += '</tr></thead><tbody>';
-                                } else {
-                                    currentContent += '<tr>';
-                                    cells.forEach(cell => {
-                                        currentContent += `<td>${cell.trim()}</td>`;
-                                    });
-                                    currentContent += '</tr>';
-                                }
-                                continue;
-                            }
-                        } else if (currentContent.includes('<table>') && !currentContent.includes('</table>')) {
-                            currentContent += '</tbody></table>';
-                        }
-                        
-                        // Xử lý văn bản thông thường
-                        if (line) {
-                            currentContent += `<p>${line}</p>`;
-                        } else {
-                            currentContent += '<br>';
-                        }
-                    }
-                }
-                
-                // Thêm nội dung cuối cùng
-                if (currentContent) {
-                    content.innerHTML += currentContent + '</div>';
+                if (headings.length === 0) {
+                    tocList.innerHTML = '<li class="toc-item"><span class="toc-link">Không tìm thấy mục lục</span></li>';
                 }
             }
         });
