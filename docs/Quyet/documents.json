@@ -15,13 +15,17 @@
       {
         "deviceID": "dev-g99cb8v",
         "at": "2025-11-25T18:45:37.579Z"
+      },
+      {
+        "deviceID": "dev-d5j0izw",
+        "at": "2025-11-25T18:52:08.583Z"
       }
     ]
   },
   {
     "id": "id_1nl5v8t",
-    "title": "quy trÃÂÃÂ¬nh kÃÂ¡ÃÂ»ÃÂ¹ thuÃÂ¡ÃÂºÃÂ­t",
-    "author": "QuyÃÂ¡ÃÂºÃÂ¿t",
+    "title": "quy trÃÂÃÂÃÂÃÂ¬nh kÃÂÃÂ¡ÃÂÃÂ»ÃÂÃÂ¹ thuÃÂÃÂ¡ÃÂÃÂºÃÂÃÂ­t",
+    "author": "QuyÃÂÃÂ¡ÃÂÃÂºÃÂÃÂ¿t",
     "file": "Quyet/Quy_trinh_ky_thuat_htm.html",
     "createdAt": "2025-11-25T16:17:13.953Z",
     "updatedAt": "2025-11-25T16:17:13.953Z",
