@@ -1,11 +1,16 @@
 [
   {
     "id": "id_1nl5v8t",
-    "title": "quy trình kỹ thuật",
-    "author": "Quyết",
+    "title": "quy trÃ¬nh ká»¹ thuáº­t",
+    "author": "Quyáº¿t",
     "file": "Quyet/Quy_trinh_ky_thuat_htm.html",
     "createdAt": "2025-11-25T16:17:13.953Z",
     "updatedAt": "2025-11-25T16:17:13.953Z",
-    "views": []
+    "views": [
+      {
+        "deviceID": "dev-c9c5b0u",
+        "at": "2025-11-25T17:27:28.780Z"
+      }
+    ]
   }
 ]
