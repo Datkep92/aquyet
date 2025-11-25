@@ -1,14 +1,14 @@
 {
   "totalDevices": 1,
-  "totalAccess": 4,
+  "totalAccess": 6,
   "onlineDevices": [
     "device_8m93zvbsu_1764096774606"
   ],
   "documentStats": {
     "11111111111111": {
-      "views": 2,
-      "lastAccess": "2025-11-25T18:53:22.050Z"
+      "views": 4,
+      "lastAccess": "2025-11-25T18:55:19.100Z"
     }
   },
-  "lastUpdated": "2025-11-25T18:54:31.381Z"
+  "lastUpdated": "2025-11-25T18:55:19.101Z"
 }
