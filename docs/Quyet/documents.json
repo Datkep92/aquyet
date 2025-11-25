@@ -7,12 +7,17 @@
     "content": "",
     "createdAt": "2025-11-25T18:43:44.960Z",
     "updatedAt": "2025-11-25T18:43:44.960Z",
-    "views": []
+    "views": [
+      {
+        "deviceID": "dev-g99cb8v",
+        "at": "2025-11-25T18:45:24.637Z"
+      }
+    ]
   },
   {
     "id": "id_1nl5v8t",
-    "title": "quy trÃÂ¬nh kÃ¡Â»Â¹ thuÃ¡ÂºÂ­t",
-    "author": "QuyÃ¡ÂºÂ¿t",
+    "title": "quy trÃÂÃÂ¬nh kÃÂ¡ÃÂ»ÃÂ¹ thuÃÂ¡ÃÂºÃÂ­t",
+    "author": "QuyÃÂ¡ÃÂºÃÂ¿t",
     "file": "Quyet/Quy_trinh_ky_thuat_htm.html",
     "createdAt": "2025-11-25T16:17:13.953Z",
     "updatedAt": "2025-11-25T16:17:13.953Z",
