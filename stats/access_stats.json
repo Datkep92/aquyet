@@ -1,6 +1,6 @@
 {
   "totalDevices": 1,
-  "totalAccess": 153,
+  "totalAccess": 154,
   "onlineDevices": [
     "device_8m93zvbsu_1764096774606"
   ],
@@ -38,9 +38,9 @@
       "lastAccess": "2025-11-26T04:21:04.417Z"
     },
     "123123123123": {
-      "views": 1,
-      "lastAccess": "2025-11-26T04:22:07.990Z"
+      "views": 2,
+      "lastAccess": "2025-11-26T04:22:42.425Z"
     }
   },
-  "lastUpdated": "2025-11-26T04:22:42.238Z"
+  "lastUpdated": "2025-11-26T04:22:42.429Z"
 }
