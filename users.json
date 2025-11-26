@@ -5,5 +5,38 @@
     "registeredAt": "2025-11-26T06:37:52.190Z",
     "deviceId": "device_y0etjtvs2_1764139072190",
     "lastLogin": "2025-11-26T09:02:40.186Z"
+  },
+  {
+    "deviceId": "test_device_user1_1764149286685",
+    "name": "Nguyễn Văn A",
+    "phone": "0912345678",
+    "role": "user",
+    "registeredAt": "2025-11-26T09:28:06.685Z",
+    "lastLogin": "2025-11-26T09:28:06.685Z"
+  },
+  {
+    "deviceId": "test_device_user2_1764149286685",
+    "name": "Trần Thị B",
+    "phone": "0923456789",
+    "role": "user",
+    "registeredAt": "2025-11-26T09:28:06.685Z",
+    "lastLogin": "2025-11-26T09:28:06.685Z"
+  },
+  {
+    "deviceId": "test_device_user3_1764149286685",
+    "name": "Lê Văn C",
+    "phone": "0934567890",
+    "role": "user",
+    "registeredAt": "2025-11-26T09:28:06.685Z",
+    "lastLogin": "2025-11-26T09:28:06.685Z"
+  },
+  {
+    "deviceId": "test_device_admin_1764149286685",
+    "name": "Phạm Admin D",
+    "phone": "0945678901",
+    "role": "admin",
+    "registeredAt": "2025-11-26T09:28:06.685Z",
+    "lastLogin": "2025-11-26T09:28:06.685Z",
+    "adminGrantedAt": "2025-11-26T09:28:06.685Z"
   }
 ]
