@@ -1,127 +1,15 @@
-{
-  "0": {
-    "id": "id_xszequq",
-    "title": "1",
-    "author": "2",
-    "file": "2/321.htm.html",
-    "createdAt": "2025-11-26T01:09:03.002Z",
-    "updatedAt": "2025-11-26T01:09:03.004Z"
-  },
-  "1": {
-    "id": "id_g04rbmp",
-    "title": "Test",
-    "author": "Quyet",
-    "file": "Quyet/Testuiuuuuuuu.htm.html",
-    "createdAt": "2025-11-25T14:40:44.704Z",
-    "updatedAt": "2025-11-25T14:40:44.704Z"
-  },
-  "2": {
-    "title": "2",
-    "author": "2",
-    "file": "2/2.html"
-  },
-  "3": {
-    "title": "123123123123",
-    "author": "1212123123123",
-    "file": "1212123123123/123123123123.html"
-  },
-  "4": {
-    "title": "31",
-    "author": "31",
-    "file": "31/31.html"
-  },
-  "5": {
-    "id": "id_0_1764150617448",
-    "title": "1.html",
-    "author": "",
-    "file": "1/1.html",
-    "createdAt": "2025-11-26T09:50:17.448Z",
-    "updatedAt": "2025-11-26T09:50:17.448Z"
-  },
-  "6": {
-    "id": "id_3_1764150617448",
-    "title": "3.html",
-    "author": "",
-    "file": "3/3.html",
-    "createdAt": "2025-11-26T09:50:17.448Z",
-    "updatedAt": "2025-11-26T09:50:17.448Z"
-  },
-  "7": {
-    "id": "id_5_1764150617448",
-    "title": "documents.json",
-    "author": "",
-    "file": "documents.json",
-    "createdAt": "2025-11-26T09:50:17.448Z",
-    "updatedAt": "2025-11-26T09:50:17.448Z"
-  },
-  "8": {
-    "id": "at_test_foder_1764150844899",
-    "title": "Test foder",
-    "author": "Đạt",
-    "authorSlug": "at",
-    "file": "at/test_foder.html",
-    "fileSize": 2123276,
-    "createdAt": "2025-11-26T09:54:04.899Z",
-    "updatedAt": "2025-11-26T09:54:04.899Z"
-  },
-  "9": {
-    "id": "1_1_1764152909608",
-    "title": "1",
-    "author": "1",
-    "authorSlug": "1",
-    "file": "1/1.html",
-    "fileSize": 2020325,
-    "createdAt": "2025-11-26T10:28:29.608Z",
-    "updatedAt": "2025-11-26T10:28:29.608Z"
-  },
-  "10": {
-    "id": "1212123123123_123123123123_1764152909929",
-    "title": "123123123123",
-    "author": "1212123123123",
-    "authorSlug": "1212123123123",
-    "file": "1212123123123/123123123123.html",
-    "fileSize": 2135348,
-    "createdAt": "2025-11-26T10:28:29.929Z",
-    "updatedAt": "2025-11-26T10:28:29.929Z"
-  },
-  "11": {
-    "id": "2_2_1764152910244",
-    "title": "2",
-    "author": "2",
-    "authorSlug": "2",
-    "file": "2/2.html",
-    "fileSize": 2147083,
-    "createdAt": "2025-11-26T10:28:30.244Z",
-    "updatedAt": "2025-11-26T10:28:30.244Z"
-  },
-  "12": {
-    "id": "3_3_1764152910557",
-    "title": "3",
-    "author": "3",
-    "authorSlug": "3",
-    "file": "3/3.html",
-    "fileSize": 2113651,
-    "createdAt": "2025-11-26T10:28:30.557Z",
-    "updatedAt": "2025-11-26T10:28:30.557Z"
-  },
-  "13": {
-    "id": "31_31_1764152910872",
-    "title": "31",
-    "author": "31",
-    "authorSlug": "31",
-    "file": "31/31.html",
-    "fileSize": 2113651,
-    "createdAt": "2025-11-26T10:28:30.872Z",
-    "updatedAt": "2025-11-26T10:28:30.872Z"
-  },
-  "14": {
-    "id": "quyet_ky_thuat_1764152911518",
-    "title": "Ky Thuat",
-    "author": "Quyet",
-    "authorSlug": "quyet",
-    "file": "quyet/ky_thuat.html",
-    "fileSize": 2113651,
-    "createdAt": "2025-11-26T10:28:31.518Z",
-    "updatedAt": "2025-11-26T10:28:31.518Z"
+[
+  {
+    "id": "queqwe_que_1764179907162",
+    "title": "qưe",
+    "author": "qưeqwe",
+    "authorSlug": "queqwe",
+    "description": "qưe",
+    "date": "2025-11-26",
+    "file": "queqwe/que.html",
+    "fileSize": 2123430,
+    "createdAt": "2025-11-26T17:58:27.162Z",
+    "updatedAt": "2025-11-26T17:58:27.167Z",
+    "isNew": true
   }
-}
+]
