@@ -1,13 +1,13 @@
 {
   "totalDevices": 1,
-  "totalAccess": 191,
+  "totalAccess": 194,
   "onlineDevices": [
     "device_8m93zvbsu_1764096774606"
   ],
   "documentStats": {
     "2": {
-      "views": 24,
-      "lastAccess": "2025-11-26T04:34:37.853Z"
+      "views": 25,
+      "lastAccess": "2025-11-26T04:34:41.992Z"
     },
     "11111111111111": {
       "views": 15,
@@ -38,9 +38,9 @@
       "lastAccess": "2025-11-26T04:32:14.915Z"
     },
     "123123123123": {
-      "views": 9,
-      "lastAccess": "2025-11-26T04:34:39.536Z"
+      "views": 10,
+      "lastAccess": "2025-11-26T04:34:40.772Z"
     }
   },
-  "lastUpdated": "2025-11-26T04:34:40.676Z"
+  "lastUpdated": "2025-11-26T04:34:43.228Z"
 }
