@@ -38,5 +38,13 @@
     "registeredAt": "2025-11-26T09:28:06.685Z",
     "lastLogin": "2025-11-26T09:28:06.685Z",
     "adminGrantedAt": "2025-11-26T09:28:06.685Z"
+  },
+  {
+    "deviceId": "device_78y8qd8sy_1764157296575",
+    "name": "Dat",
+    "phone": "123456789",
+    "role": "user",
+    "registeredAt": "2025-11-26T11:41:36.575Z",
+    "lastLogin": "2025-11-26T11:41:36.575Z"
   }
 ]
