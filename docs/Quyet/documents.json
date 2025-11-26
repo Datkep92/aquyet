@@ -66,5 +66,16 @@
     "file": "31/31.html",
     "date": "2025-11-26",
     "isNew": true
+  },
+  {
+    "id": "quyet_ky_thuat_1764150776538",
+    "title": "kỹ thuật",
+    "author": "quyết",
+    "authorSlug": "quyet",
+    "file": "quyet/ky_thuat.html",
+    "fileSize": 2101738,
+    "createdAt": "2025-11-26T09:52:56.538Z",
+    "updatedAt": "2025-11-26T09:52:56.538Z",
+    "isNew": true
   }
 ]
