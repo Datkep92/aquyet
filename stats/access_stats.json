@@ -1,13 +1,13 @@
 {
   "totalDevices": 1,
-  "totalAccess": 77,
+  "totalAccess": 79,
   "onlineDevices": [
     "device_8m93zvbsu_1764096774606"
   ],
   "documentStats": {
     "2": {
-      "views": 1,
-      "lastAccess": "2025-11-26T03:59:01.009Z"
+      "views": 2,
+      "lastAccess": "2025-11-26T03:59:26.284Z"
     },
     "11111111111111": {
       "views": 15,
@@ -18,8 +18,8 @@
       "lastAccess": "2025-11-26T03:59:02.619Z"
     },
     "documents.json": {
-      "views": 2,
-      "lastAccess": "2025-11-26T03:59:04.044Z"
+      "views": 3,
+      "lastAccess": "2025-11-26T03:59:17.685Z"
     },
     "Quy trình kỹ thuật Phong Dieu duong.htm": {
       "views": 5,
@@ -34,5 +34,5 @@
       "lastAccess": "2025-11-26T03:57:34.034Z"
     }
   },
-  "lastUpdated": "2025-11-26T03:59:17.667Z"
+  "lastUpdated": "2025-11-26T03:59:26.285Z"
 }
